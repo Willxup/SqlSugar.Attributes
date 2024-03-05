@@ -1,5 +1,7 @@
 # SqlSugar.Attributes
 
+[![SqlSugar.Attributes](https://img.shields.io/nuget/v/SqlSugar.Attributes)](https://www.nuget.org/packages/SqlSugar.Attributes)
+
 `SqlSugar.Attributes`基于[`SqlSugar`](https://github.com/DotNetNext/SqlSugar)和`C#`特性 配置dto模型，只需要在模型上配置表信息，即可自动拼接SQL，实现查询插入更新等功能，实现高效项目开发和迭代。
 
 # Getting Started
