@@ -1,5 +1,5 @@
-﻿using SqlSugar.Attributes.Extension.Extensions.Attributes.Operation;
-using System;
+﻿using SqlSugar.Attributes.Extension.Common;
+using SqlSugar.Attributes.Extension.Extensions.Attributes.Operation;
 using System.Collections.Generic;
 
 namespace SqlSugar.Attributes.Extension.Extensions
@@ -61,12 +61,12 @@ namespace SqlSugar.Attributes.Extension.Extensions
 
                 }
                 if (fields.Count <= 0)
-                    throw new Exception("没有需要更新的字段!");
+                    throw new UserOperationException("没有需要更新的字段!");
 
                 return db.Insertable<TEntity>(fields);
             }
             else
-                throw new Exception("DTO对象不存在属性!");
+                throw new UserOperationException("DTO对象不存在属性!");
         }
         #endregion
 
@@ -140,16 +140,16 @@ namespace SqlSugar.Attributes.Extension.Extensions
                 }
 
                 if (conditions.Count <= 0)
-                    throw new Exception("请标记更新条件!");
+                    throw new UserOperationException("请标记更新条件!");
 
                 if (fields.Count <= 0)
-                    throw new Exception("没有需要更新的字段!");
+                    throw new UserOperationException("没有需要更新的字段!");
 
                 var insertable = db.Updateable<TEntity>(fields).WhereColumns(conditions.ToArray());
                 return insertable;
             }
             else
-                throw new Exception("DTO对象不存在属性!");
+                throw new UserOperationException("DTO对象不存在属性!");
         }
         #endregion
     }

@@ -43,6 +43,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
         /// <typeparam name="TSearch"></typeparam>
         /// <param name="search"></param>
         /// <returns></returns>
+        /// <exception cref="UserOperationException"></exception>
         private static List<IConditionalModel> GetWhereParameters<TSearch>(this TSearch search)
         {
             List<IConditionalModel> conditions = new List<IConditionalModel>();
@@ -126,7 +127,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                         condition.ConditionalType = attr.GetDbOperator();
                     }
                     else
-                        throw new Exception($"请配置{prop.Name}操作符!");
+                        throw new UserOperationException($"请配置{prop.Name}操作符!");
                     #endregion
 
                     #region 参数赋值
@@ -189,6 +190,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
         /// <typeparam name="TResultModel"></typeparam>
         /// <param name="search"></param>
         /// <returns></returns>
+        /// <exception cref="UserOperationException"></exception>
         private static string GetSelectSQL<TResultModel>(this TResultModel search)
         {
             StringBuilder select = new StringBuilder();
@@ -207,7 +209,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
 
                     //校验是否多次标记
                     if (prop.GetCustomAttributes(typeof(DbQueryAttribute), true).Length > 1)
-                        throw new Exception("查询字段特性存在多个!");
+                        throw new UserOperationException("查询字段特性存在多个!");
                     #endregion
 
                     string sql = string.Empty;
@@ -220,7 +222,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
 
                         //校验子查询
                         if (prop.IsDefined(typeof(DbSubQueryAttribute), true))
-                            throw new Exception("使用[DbSubQueryAttribute]子查询时，请去除[DbTableAliasAttribute]!");
+                            throw new UserOperationException("使用[DbSubQueryAttribute]子查询时，请去除[DbTableAliasAttribute]!");
 
 
                         sql += "`" + attr.GetTableAlias() + "`" + ".";
@@ -235,7 +237,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
 
                         if (fieldName.ToUpper().Contains("SELECT") || fieldName.ToUpper().Contains("FROM") || fieldName.ToUpper().Contains("WHERE"))
                         {
-                            throw new Exception("请使用[DbSubQueryAttribute]子查询!");
+                            throw new UserOperationException("请使用[DbSubQueryAttribute]子查询!");
                         }
 
                         //如果为布尔值，转换为布尔值
@@ -272,7 +274,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                 }
             }
             else
-                throw new Exception("查询对象不存在属性!");
+                throw new UserOperationException("查询对象不存在属性!");
 
             //校验是否存在SELECT内容
             if (select.Length > 0)
