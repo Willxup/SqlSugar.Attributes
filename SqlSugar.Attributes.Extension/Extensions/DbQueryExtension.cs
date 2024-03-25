@@ -47,27 +47,22 @@ namespace SqlSugar.Attributes.Extension.Extensions
         {
             List<IConditionalModel> conditions = new List<IConditionalModel>();
 
+            //获取查询条件模型属性
             var props = search.GetType().GetProperties();
+
             if (props?.Length > 0)
             {
                 foreach (var prop in props)
                 {
+                    #region 参数校验
                     //校验是否为忽略字段
                     if (prop.GetCustomAttributes(typeof(DbIgnoreFieldAttribute), true).Length > 0)
                     {
                         continue;
                     }
-                    //校验是否标记查询
-                    if (prop.GetCustomAttributes(typeof(DbQueryFieldAttribute), true).Length == 0)
-                    {
-                        continue;
-                    }
-                    //校验是否多次标记
-                    if (prop.GetCustomAttributes(typeof(DbQueryOperatorAttribute), true).Length == 0)
-                    {
-                        continue;
-                    }
+                    #endregion
 
+                    #region 获取参数值
                     //获取属性值
                     var value = prop.GetValue(search);
 
@@ -80,7 +75,8 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     if (value is string stringValue && string.IsNullOrWhiteSpace(stringValue))
                     {
                         continue;
-                    }
+                    } 
+                    #endregion
 
                     ConditionalModel condition = new ConditionalModel();
 
@@ -88,6 +84,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     bool isDateQuery = false;
                     string timeSuffix = "";
 
+                    #region 表字段获取
                     //表别名
                     if (prop.IsDefined(typeof(DbTableAliasAttribute), true))
                     {
@@ -115,14 +112,24 @@ namespace SqlSugar.Attributes.Extension.Extensions
                             }
                         }
                     }
+                    //未配置DbQueryField，直接取字段名称
+                    else
+                    {
+                        condition.FieldName += prop.Name;
+                    }
+                    #endregion
 
-                    //操作符
+                    #region 操作符
                     if (prop.IsDefined(typeof(DbQueryOperatorAttribute), true))
                     {
                         var attr = prop.GetCustomAttributes(typeof(DbQueryOperatorAttribute), true)[0] as DbQueryOperatorAttribute;
                         condition.ConditionalType = attr.GetDbOperator();
                     }
+                    else
+                        throw new Exception($"请配置{prop.Name}操作符!");
+                    #endregion
 
+                    #region 参数赋值
                     //字段类型
                     Type propType = prop.PropertyType;
 
@@ -167,7 +174,8 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     {
                         condition.CSharpTypeName = propType.Name;
                         condition.FieldValue = value.ToString();
-                    }
+                    } 
+                    #endregion
 
                     conditions.Add(condition);
                 }
@@ -185,38 +193,35 @@ namespace SqlSugar.Attributes.Extension.Extensions
         {
             StringBuilder select = new StringBuilder();
 
+            // 获取查询模型属性
             var props = search.GetType().GetProperties();
 
             if (props?.Length > 0)
             {
                 foreach (var prop in props)
                 {
+                    #region 参数校验
                     //校验是否为忽略字段
                     if (prop.GetCustomAttributes(typeof(DbIgnoreFieldAttribute), true).Length > 0)
-                    {
                         continue;
-                    }
-                    //校验是否标记查询
-                    if (prop.GetCustomAttributes(typeof(DbQueryAttribute), true).Length == 0)
-                    {
-                        continue;
-                    }
+
                     //校验是否多次标记
                     if (prop.GetCustomAttributes(typeof(DbQueryAttribute), true).Length > 1)
-                    {
-                        throw new Exception("[DbQueryFieldAttribute]和[DbSubQueryAttribute]不能同时使用!");
-                    }
+                        throw new Exception("查询字段特性存在多个!");
+                    #endregion
 
                     string sql = string.Empty;
 
                     //表别名
                     if (prop.IsDefined(typeof(DbTableAliasAttribute), true))
                     {
+
                         var attr = prop.GetCustomAttributes(typeof(DbTableAliasAttribute), true)[0] as DbTableAliasAttribute;
+
+                        //校验子查询
                         if (prop.IsDefined(typeof(DbSubQueryAttribute), true))
-                        {
                             throw new Exception("使用[DbSubQueryAttribute]子查询时，请去除[DbTableAliasAttribute]!");
-                        }
+
 
                         sql += "`" + attr.GetTableAlias() + "`" + ".";
                     }
@@ -243,6 +248,11 @@ namespace SqlSugar.Attributes.Extension.Extensions
                             sql += "`" + fieldName + "`";
                         }
                     }
+                    ////未配置DbQueryField，直接取字段名称
+                    else
+                    {
+                        sql += "`" + prop.Name + "`";
+                    }
 
                     //子查询
                     if (prop.IsDefined(typeof(DbSubQueryAttribute), true))
@@ -252,7 +262,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                         sql += "(" + attr.GetSubQuery() + ")";
                     }
 
-                    //表字段或子查询 别名
+                    //别名 表字段或子查询
                     if (!string.IsNullOrEmpty(sql))
                     {
                         sql += " AS " + prop.Name + ", ";
@@ -261,10 +271,15 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     }
                 }
             }
+            else
+                throw new Exception("查询对象不存在属性!");
+
+            //校验是否存在SELECT内容
             if (select.Length > 0)
             {
                 return select.Remove(select.Length - 2, 2).ToString();
             }
+
             return string.Empty;
         }
         #endregion

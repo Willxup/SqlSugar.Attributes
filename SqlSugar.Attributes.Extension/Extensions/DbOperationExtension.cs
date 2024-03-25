@@ -20,6 +20,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
             where TEntity : class, new()
 
         {
+            //获取DTO模型属性
             var props = dto.GetType().GetProperties();
 
             if (props?.Length > 0)
@@ -28,40 +29,44 @@ namespace SqlSugar.Attributes.Extension.Extensions
 
                 foreach (var prop in props)
                 {
+                    #region 参数校验
                     //校验是否为忽略字段
                     if (prop.GetCustomAttributes(typeof(DbIgnoreFieldAttribute), true).Length > 0)
                     {
                         continue;
                     }
+                    #endregion
 
-                    //校验是否标记特性
-                    if (prop.GetCustomAttributes(typeof(DbOperationFieldAttribute), true).Length == 0)
-                    {
-                        continue;
-                    }
+                    #region 表字段获取及参数赋值
+                    //获取参数值
+                    var value = prop.GetValue(dto) ?? null;
+
+                    //判断参数值是否为字符串，如果是字符串且为空
+                    if (value is string stringValue && string.IsNullOrEmpty(stringValue))
+                        value = null;
 
                     //映射参数
                     if (prop.IsDefined(typeof(DbOperationFieldAttribute), true))
                     {
-
-                        var value = prop.GetValue(dto);
                         var attr = prop.GetCustomAttributes(typeof(DbOperationFieldAttribute), true)[0] as DbOperationFieldAttribute;
-
-                        value ??= null;
-
-                        if (value is string stringValue && string.IsNullOrEmpty(stringValue))
-                            value = null;
 
                         fields.Add(attr.GetFieldName(), value); ;
                     }
-                }
-                if (fields?.Count > 0)
-                {
-                    return db.Insertable<TEntity>(fields);
-                }
-            }
+                    //未配置DbOperationField，直接取字段名称
+                    else
+                    {
+                        fields.Add(prop.Name, value); ;
+                    }
+                    #endregion
 
-            throw new Exception("DTO对象不存在需要插入的值!");
+                }
+                if (fields.Count <= 0)
+                    throw new Exception("没有需要更新的字段!");
+
+                return db.Insertable<TEntity>(fields);
+            }
+            else
+                throw new Exception("DTO对象不存在属性!");
         }
         #endregion
 
@@ -80,6 +85,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
             where TEntity : class, new()
 
         {
+            //获取DTO模型属性
             var props = dto.GetType().GetProperties();
 
             if (props?.Length > 0)
@@ -90,22 +96,24 @@ namespace SqlSugar.Attributes.Extension.Extensions
 
                 foreach (var prop in props)
                 {
+                    #region 参数校验
                     //校验是否为忽略字段
                     if (prop.GetCustomAttributes(typeof(DbIgnoreFieldAttribute), true).Length > 0)
                     {
                         continue;
                     }
+                    #endregion
 
-                    //校验是否标记特性
-                    if (prop.GetCustomAttributes(typeof(DbOperationFieldAttribute), true).Length == 0)
-                    {
-                        continue;
-                    }
+                    #region 表字段获取及参数赋值
+                    //获取参数值
+                    var value = prop.GetValue(dto) ?? null;
+
+                    //判断参数值是否为字符串，如果是字符串且为空
+                    if (value is string stringValue && string.IsNullOrEmpty(stringValue))
+                        value = null;
 
                     if (prop.IsDefined(typeof(DbOperationFieldAttribute), true))
                     {
-
-                        var value = prop.GetValue(dto);
                         var attr = prop.GetCustomAttributes(typeof(DbOperationFieldAttribute), true)[0] as DbOperationFieldAttribute;
 
                         //是否为更新条件
@@ -114,31 +122,34 @@ namespace SqlSugar.Attributes.Extension.Extensions
                             conditions.Add(attr.GetFieldName());
                         }
 
-                        //映射参数
-                        if (attr.IsAllowEmpty())
+                        //参数是否允许更新为空,不允许更新为空，就直接忽略该字段不进行更新
+                        if (!attr.IsAllowEmpty())
                         {
-                            value ??= null;
-
-                            if (value is string stringValue && string.IsNullOrEmpty(stringValue)) value = null;
-
-                        }
-                        else
-                        {
-                            if (value is null) continue;
-                            if (value is string stringValue && string.IsNullOrEmpty(stringValue)) continue;
+                            if (value is null)
+                                continue;
                         }
 
                         fields.Add(attr.GetFieldName(), value); ;
                     }
+                    //未配置DbOperationField，直接取字段名称
+                    else
+                    {
+                        fields.Add(prop.Name, value);
+                    }
+                    #endregion
                 }
-                if (conditions?.Count > 0 && fields?.Count > 0)
-                {
-                    var insertable = db.Updateable<TEntity>(fields).WhereColumns(conditions.ToArray());
-                    return insertable;
-                }
-            }
 
-            throw new Exception("DTO对象不存在需要更新的值!");
+                if (conditions.Count <= 0)
+                    throw new Exception("请标记更新条件!");
+
+                if (fields.Count <= 0)
+                    throw new Exception("没有需要更新的字段!");
+
+                var insertable = db.Updateable<TEntity>(fields).WhereColumns(conditions.ToArray());
+                return insertable;
+            }
+            else
+                throw new Exception("DTO对象不存在属性!");
         }
         #endregion
     }
