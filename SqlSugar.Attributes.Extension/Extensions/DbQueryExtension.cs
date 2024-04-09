@@ -250,18 +250,17 @@ namespace SqlSugar.Attributes.Extension.Extensions
                             sql += "`" + fieldName + "`";
                         }
                     }
-                    ////未配置DbQueryField，直接取字段名称
-                    else
-                    {
-                        sql += "`" + prop.Name + "`";
-                    }
-
                     //子查询
-                    if (prop.IsDefined(typeof(DbSubQueryAttribute), true))
+                    else if (prop.IsDefined(typeof(DbSubQueryAttribute), true))
                     {
                         var attr = prop.GetCustomAttributes(typeof(DbSubQueryAttribute), true)[0] as DbSubQueryAttribute;
 
                         sql += "(" + attr.GetSubQuery() + ")";
+                    }
+                    // 未配置DbQueryField和DbSubQuery，直接取字段名称
+                    else
+                    {
+                        sql += "`" + prop.Name + "`";
                     }
 
                     //别名 表字段或子查询
