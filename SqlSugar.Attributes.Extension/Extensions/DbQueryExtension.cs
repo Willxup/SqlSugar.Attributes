@@ -58,9 +58,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     #region 参数校验
                     //校验是否为忽略字段
                     if (prop.GetCustomAttributes(typeof(DbIgnoreFieldAttribute), true).Length > 0)
-                    {
                         continue;
-                    }
                     #endregion
 
                     #region 获取参数值
@@ -69,14 +67,11 @@ namespace SqlSugar.Attributes.Extension.Extensions
 
                     //null校验
                     if (value is null)
-                    {
                         continue;
-                    }
+
                     //空字符串校验
                     if (value is string stringValue && string.IsNullOrWhiteSpace(stringValue))
-                    {
                         continue;
-                    } 
                     #endregion
 
                     ConditionalModel condition = new ConditionalModel();
@@ -187,16 +182,16 @@ namespace SqlSugar.Attributes.Extension.Extensions
         /// <summary>
         /// 获取查询结果参数SQL
         /// </summary>
-        /// <typeparam name="TResultModel"></typeparam>
-        /// <param name="search"></param>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="result"></param>
         /// <returns></returns>
         /// <exception cref="UserOperationException"></exception>
-        private static string GetSelectSQL<TResultModel>(this TResultModel search)
+        private static string GetSelectSQL<TResult>(this TResult result)
         {
             StringBuilder select = new StringBuilder();
 
             // 获取查询模型属性
-            var props = search.GetType().GetProperties();
+            var props = result.GetType().GetProperties();
 
             if (props?.Length > 0)
             {
@@ -272,13 +267,99 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     }
                 }
             }
-            else
-                throw new UserOperationException("查询对象不存在属性!");
 
             //校验是否存在SELECT内容
             if (select.Length > 0)
             {
                 return select.Remove(select.Length - 2, 2).ToString();
+            }
+
+            return string.Empty;
+        }
+        /// <summary>
+        /// 获取查询分组SQL
+        /// </summary>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        /// <exception cref="UserOperationException"></exception>
+        public static string GetGroupBySql<TResult>(this TResult result)
+        {
+            StringBuilder groupby = new StringBuilder();
+
+            // 获取查询模型属性
+            var props = result.GetType().GetProperties();
+
+            if (props?.Length > 0)
+            {
+                foreach (var prop in props)
+                {
+                    #region 参数校验
+                    //校验是否为忽略字段
+                    if (prop.GetCustomAttributes(typeof(DbIgnoreFieldAttribute), true).Length > 0)
+                        continue;
+                    #endregion
+
+                    string sql = string.Empty;
+
+                    if(prop.IsDefined(typeof(DbGroupByAttribute), true))
+                    {
+                        var groupByAttr = prop.GetCustomAttributes(typeof(DbGroupByAttribute), true)[0] as DbGroupByAttribute;
+
+                        //是否使用查询特性参数
+                        //不使用查询特性
+                        if (!groupByAttr.IsUseQueryFieldAttribute())
+                        {
+                            //表别名
+                            string tableAlias = groupByAttr.GetTableAlias();
+
+                            if (!string.IsNullOrEmpty(tableAlias))
+                            {
+                                sql += "`" + tableAlias + "`" + ".";
+                            }
+
+                            //表字段名
+                            sql += "`" + groupByAttr.GetFieldName() + "`";
+                        }
+                        //使用查询特性
+                        else
+                        {
+                            //表别名
+                            if (prop.IsDefined(typeof(DbTableAliasAttribute), true))
+                            {
+
+                                var attr = prop.GetCustomAttributes(typeof(DbTableAliasAttribute), true)[0] as DbTableAliasAttribute;
+
+                                sql += "`" + attr.GetTableAlias() + "`" + ".";
+                            }
+
+                            //表字段名
+                            if (prop.IsDefined(typeof(DbQueryFieldAttribute), true))
+                            {
+                                var attr = prop.GetCustomAttributes(typeof(DbQueryFieldAttribute), true)[0] as DbQueryFieldAttribute;
+
+                                sql += "`" + attr.GetFieldName() + "`";
+                            }
+                            // 未配置DbQueryField，直接取字段名称
+                            else
+                            {
+                                sql += "`" + prop.Name + "`";
+                            }
+                        }
+
+                        //拼接sql
+                        if (!string.IsNullOrEmpty(sql))
+                        {
+                            groupby.Append(sql + ", ");
+                        }
+                    }
+                }
+            }
+
+            //校验是否存在GROUP BY内容
+            if (groupby.Length > 0)
+            {
+                return groupby.Remove(groupby.Length - 2, 2).ToString();
             }
 
             return string.Empty;
@@ -335,6 +416,52 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     var attr = item as DbDefaultOrderByAttribute;
 
                     queryable = queryable.OrderBy($"{attr.GetOrderField()} {attr.GetSortWay()}");
+                }
+            }
+
+            return queryable;
+        }
+        #endregion
+
+        #region GroupBy
+        /// <summary>
+        /// 自动拼接查询分组
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="queryable"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public static ISugarQueryable<T> GroupBy<T, TResult>(this ISugarQueryable<T> queryable, TResult result)
+        {
+            //获取分组部分
+            string groupBySql = result.GetGroupBySql();
+            if (!string.IsNullOrEmpty(groupBySql))
+            {
+                queryable = queryable.GroupBy(groupBySql);
+            }
+
+            return queryable;
+        }
+        /// <summary>
+        /// 自动拼接分组条件
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="queryable"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        public static ISugarQueryable<T> Having<T, TResult>(this ISugarQueryable<T> queryable, TResult result)
+        {
+            object[] condition = result.GetType().GetCustomAttributes(typeof(DbHavingAttribute), true);
+
+            if (condition?.Length > 0)
+            {
+                foreach (var item in condition)
+                {
+                    var attr = item as DbHavingAttribute;
+
+                    queryable = queryable.Having($"{attr.GetCondition()}");
                 }
             }
 
