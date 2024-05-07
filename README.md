@@ -10,6 +10,10 @@
 
 使用`SqlSugar.Attributes`可以直接配置DTO模型，配置完成后，将会自动映射查询条件及结果。
 
+
+
+### 普通查询
+
 - 创建查询的查询条件类
 
 ```c#
@@ -98,6 +102,83 @@ FROM Table_Name t
 WHERE t.t_Name LIKE '%@Name%' AND t.t_CodeId IN (@CodeIds)
 ORDER BY t.t_Name DESC;
 ```
+
+
+
+### 分组查询
+
+- 创建查询的查询条件类
+
+```c#
+[DbDefaultOrderBy("CountNums", DbSortWay.DESC)]
+public class Search
+{
+    [DbQueryField("t_GroupCode")] //字段名
+	[DbQueryOperator(DbOperator.Like)]  //操作符, Like查询
+	public long GroupCode { get; set; }
+	[DbQueryField("t_GroupName")] //字段名
+	[DbQueryOperator(DbOperator.Like)]  //操作符, Like查询
+	public string GroupName { get; set; }
+}
+```
+
+- 创建查询的结果类
+
+```c#
+[DbHaving("CountNums > 0")]
+public class Result
+{
+	[DbQueryField("t_GroupCode")] //字段名
+	[DbGroupBy("t_GroupCode")] //分组
+	public long GroupCode { get; set; }
+	[DbQueryField("t_GroupName")] //字段名
+    [DbGroupBy("t_GroupName")] //分组
+	public string GroupName { get; set; }
+    [DbSubQuery("Count(t_CodeId)")]
+    public string CountNums { get; set; }
+}
+```
+
+- 查询方法
+
+```c#
+public class Test
+{
+    /// <summary>
+    /// SqlSugar dbcontext
+    /// </summary>
+	private readonly ISqlSugarClient _dbContext;
+    
+    public async Task<List<Result>> Get(Search search)
+    {
+    	return await _dbContext.Queryable<Table_Name>()
+            .Where(search) //查询条件
+            .OrderBy(search) //排序
+            .GroupBy(new Result) //分组
+			.Having(new Result) //分组条件
+            .Select(new Result()) //查询结果
+            .ToListAsync();
+    }
+}
+```
+
+
+
+- 查询SQL
+
+```sql
+SELECT 
+t_GroupCode as GroupCode, 
+t_GroupName as t_GroupName, 
+(Count(t_CodeId)) AS CountNums
+FROM Table_Name
+GROUP BY t_GroupCode,t_GroupName
+HAVING CountNums > 0
+WHERE t_GroupCode LIKE '%@Name%' AND t_GroupName LIKE '%@GroupName%'
+ORDER BY CountNums DESC;
+```
+
+
 
 
 
