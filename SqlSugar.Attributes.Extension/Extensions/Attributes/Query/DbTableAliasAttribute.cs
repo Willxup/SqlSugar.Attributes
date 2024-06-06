@@ -20,7 +20,7 @@ namespace SqlSugar.Attributes.Extension.Extensions.Attributes.Query
         /// <param name="tableAlias">表别名</param>
         public DbTableAliasAttribute(string tableAlias)
         {
-            _tableAlias = DbUtilities.CheckDbFieldName(tableAlias);
+            _tableAlias = DbUtilities.IsNullDbFieldName(tableAlias);
         }
 
         /// <summary>

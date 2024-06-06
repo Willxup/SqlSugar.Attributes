@@ -8,6 +8,9 @@ namespace SqlSugar.Attributes.Extension.Extensions
     [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = false)]
     public class DbIgnoreFieldAttribute : Attribute
     {
+        /// <summary>
+        /// 构造
+        /// </summary>
         public DbIgnoreFieldAttribute() { }
     }
 }

@@ -10,7 +10,7 @@ namespace SqlSugar.Attributes.Extension.Common
         /// <param name="value"></param>
         /// <returns></returns>
         /// <exception cref="UserOperationException"></exception>
-        internal static string CheckDbFieldName(string value)
+        internal static string IsNullDbFieldName(string value)
         {
             if (!string.IsNullOrEmpty(value))
             {

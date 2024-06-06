@@ -40,7 +40,7 @@ namespace SqlSugar.Attributes.Extension.Extensions.Attributes.Query
         /// <param name="fieldName">表字段名</param>
         public DbQueryFieldAttribute(string fieldName)
         {
-            _fieldName = DbUtilities.CheckDbFieldName(fieldName);
+            _fieldName = DbUtilities.IsNullDbFieldName(fieldName);
         }
         /// <summary>
         /// 构造
@@ -63,7 +63,7 @@ namespace SqlSugar.Attributes.Extension.Extensions.Attributes.Query
         public DbQueryFieldAttribute(string fieldName, DbTimeSuffixType suffixType, string timeSuffix = "")
         {
             _isDateQuery = true;
-            _fieldName = DbUtilities.CheckDbFieldName(fieldName);
+            _fieldName = DbUtilities.IsNullDbFieldName(fieldName);
             _suffixType = suffixType;
             _timeSuffix = timeSuffix;
         }
