@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SqlSugar.Attributes.Extension.Common
+﻿namespace SqlSugar.Attributes.Extension.Common
 {
     internal static class DbUtilities
     {
@@ -9,7 +7,7 @@ namespace SqlSugar.Attributes.Extension.Common
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        /// <exception cref="UserOperationException"></exception>
+        /// <exception cref="GlobalException"></exception>
         internal static string IsNullDbFieldName(string value)
         {
             if (!string.IsNullOrEmpty(value))
@@ -18,7 +16,7 @@ namespace SqlSugar.Attributes.Extension.Common
             }
             else
             {
-                throw new Exception("数据库字段名不能为空!");
+                throw new GlobalException("数据库字段名不能为空!");
             }
         }
         /// <summary>

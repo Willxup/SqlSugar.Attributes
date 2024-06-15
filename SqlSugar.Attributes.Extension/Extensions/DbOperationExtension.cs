@@ -61,12 +61,12 @@ namespace SqlSugar.Attributes.Extension.Extensions
 
                 }
                 if (fields.Count <= 0)
-                    throw new UserOperationException("没有需要更新的字段!");
+                    throw new GlobalException("没有需要更新的字段!");
 
                 return db.Insertable<TEntity>(fields);
             }
             else
-                throw new UserOperationException("DTO对象不存在属性!");
+                throw new GlobalException("DTO对象不存在属性!");
         }
         #endregion
 
@@ -79,7 +79,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
         /// <param name="db"></param>
         /// <param name="dto">dto模型</param>
         /// <returns></returns>
-        /// <exception cref="UserOperationException"></exception>
+        /// <exception cref="GlobalException"></exception>
         public static IUpdateable<TEntity> Updateable<TDto, TEntity>(this SqlSugarScope db, TDto dto)
             where TDto : class, new()
             where TEntity : class, new()
@@ -140,16 +140,16 @@ namespace SqlSugar.Attributes.Extension.Extensions
                 }
 
                 if (conditions.Count <= 0)
-                    throw new UserOperationException("请标记更新条件!");
+                    throw new GlobalException("请标记更新条件!");
 
                 if (fields.Count <= 0)
-                    throw new UserOperationException("没有需要更新的字段!");
+                    throw new GlobalException("没有需要更新的字段!");
 
                 var insertable = db.Updateable<TEntity>(fields).WhereColumns(conditions.ToArray());
                 return insertable;
             }
             else
-                throw new UserOperationException("DTO对象不存在属性!");
+                throw new GlobalException("DTO对象不存在属性!");
         }
         #endregion
     }

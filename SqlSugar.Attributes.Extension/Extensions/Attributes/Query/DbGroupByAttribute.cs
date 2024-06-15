@@ -24,7 +24,7 @@ namespace SqlSugar.Attributes.Extension.Extensions.Attributes.Query
         /// <summary>
         /// 构造
         /// </summary>
-        public DbGroupByAttribute() 
+        public DbGroupByAttribute()
         {
             _isUseQueryFieldAttribute = true;
         }

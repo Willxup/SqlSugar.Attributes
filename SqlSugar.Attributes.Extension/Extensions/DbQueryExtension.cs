@@ -43,7 +43,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
         /// <typeparam name="TSearch"></typeparam>
         /// <param name="search"></param>
         /// <returns></returns>
-        /// <exception cref="UserOperationException"></exception>
+        /// <exception cref="GlobalException"></exception>
         private static List<IConditionalModel> GetWhereParameters<TSearch>(this TSearch search)
         {
             List<IConditionalModel> conditions = new List<IConditionalModel>();
@@ -122,7 +122,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                         condition.ConditionalType = attr.GetDbOperator();
                     }
                     else
-                        throw new UserOperationException($"请配置{prop.Name}操作符!");
+                        throw new GlobalException($"请配置{prop.Name}操作符!");
                     #endregion
 
                     #region 参数赋值
@@ -170,7 +170,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     {
                         condition.CSharpTypeName = propType.Name;
                         condition.FieldValue = value.ToString();
-                    } 
+                    }
                     #endregion
 
                     conditions.Add(condition);
@@ -185,7 +185,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
         /// <typeparam name="TResult"></typeparam>
         /// <param name="result"></param>
         /// <returns></returns>
-        /// <exception cref="UserOperationException"></exception>
+        /// <exception cref="GlobalException"></exception>
         private static string GetSelectSQL<TResult>(this TResult result)
         {
             StringBuilder select = new StringBuilder();
@@ -204,7 +204,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
 
                     //校验是否多次标记
                     if (prop.GetCustomAttributes(typeof(DbQueryAttribute), true).Length > 1)
-                        throw new UserOperationException("查询字段特性存在多个!");
+                        throw new GlobalException("查询字段特性存在多个!");
                     #endregion
 
                     string sql = string.Empty;
@@ -217,7 +217,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
 
                         //校验子查询
                         if (prop.IsDefined(typeof(DbSubQueryAttribute), true))
-                            throw new UserOperationException("使用[DbSubQueryAttribute]子查询时，请去除[DbTableAliasAttribute]!");
+                            throw new GlobalException("使用[DbSubQueryAttribute]子查询时，请去除[DbTableAliasAttribute]!");
 
 
                         sql += "`" + attr.GetTableAlias() + "`" + ".";
@@ -232,7 +232,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
 
                         if (fieldName.ToUpper().Contains("SELECT") || fieldName.ToUpper().Contains("FROM") || fieldName.ToUpper().Contains("WHERE"))
                         {
-                            throw new UserOperationException("请使用[DbSubQueryAttribute]子查询!");
+                            throw new GlobalException("请使用[DbSubQueryAttribute]子查询!");
                         }
 
                         //如果为布尔值，转换为布尔值
@@ -282,7 +282,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
         /// <typeparam name="TResult"></typeparam>
         /// <param name="result"></param>
         /// <returns></returns>
-        /// <exception cref="UserOperationException"></exception>
+        /// <exception cref="GlobalException"></exception>
         public static string GetGroupBySql<TResult>(this TResult result)
         {
             StringBuilder groupby = new StringBuilder();
@@ -302,7 +302,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
 
                     string sql = string.Empty;
 
-                    if(prop.IsDefined(typeof(DbGroupByAttribute), true))
+                    if (prop.IsDefined(typeof(DbGroupByAttribute), true))
                     {
                         var groupByAttr = prop.GetCustomAttributes(typeof(DbGroupByAttribute), true)[0] as DbGroupByAttribute;
 
