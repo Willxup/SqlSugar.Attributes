@@ -3,7 +3,7 @@ using System.Globalization;
 
 namespace SqlSugar.Attributes.Extension.Common
 {
-    internal static class DateTimeTool
+    internal static class DateTool
     {
         /// <summary>
         /// 时间类型转格式化后时间字符串
