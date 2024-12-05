@@ -147,6 +147,12 @@ namespace SqlSugar.Attributes.Extension.Extensions
                         condition.CSharpTypeName = typeof(DateTime)?.Name;
                         condition.FieldValue = ((DateTime)value).ToFormattedString();
                     }
+                    //布尔值
+                    else if (propType == typeof(bool) || propType == typeof(bool?))
+                    {
+                        condition.CSharpTypeName = typeof(bool)?.Name;
+                        condition.FieldValue = ((bool)value).ToString();
+                    }
                     //基础类型
                     else if (propType.IsPrimitive)
                     {
