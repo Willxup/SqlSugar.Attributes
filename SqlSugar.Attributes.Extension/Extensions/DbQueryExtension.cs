@@ -267,7 +267,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     //别名 表字段或子查询
                     if (!string.IsNullOrEmpty(sql))
                     {
-                        sql += " AS " + prop.Name + ", ";
+                        sql += " AS " + "`" + prop.Name + "`" + ", ";
 
                         select.Append(sql);
                     }
