@@ -116,12 +116,6 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     {
                         var attr = prop.GetCustomAttributes(typeof(DbOperationFieldAttribute), true)[0] as DbOperationFieldAttribute;
 
-                        //是否为更新条件
-                        if (attr.IsCondition())
-                        {
-                            conditions.Add(attr.GetFieldName());
-                        }
-
                         //参数是否允许更新为空,不允许更新为空，就直接忽略该字段不进行更新
                         if (!attr.IsAllowEmpty())
                         {
@@ -129,7 +123,13 @@ namespace SqlSugar.Attributes.Extension.Extensions
                                 continue;
                         }
 
-                        fields.Add(attr.GetFieldName(), value); ;
+                        //是否为更新条件
+                        if (attr.IsCondition())
+                        {
+                            conditions.Add(attr.GetFieldName());
+                        }
+
+                        fields.Add(attr.GetFieldName(), value);
                     }
                     //未配置DbOperationField，直接取字段名称
                     else
