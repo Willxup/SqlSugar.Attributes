@@ -21,7 +21,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
             string[] elements = new string[array.Length];
             for (int i = 0; i < array.Length; i++)
             {
-                elements[i] = array.GetValue(i).ToString();
+                elements[i] = array.GetValue(i).ToString().ToSqlFilter();
             }
             return elements;
         }
@@ -34,7 +34,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
         {
             foreach (var item in list)
             {
-                yield return item.ToString();
+                yield return item.ToString().ToSqlFilter();
             }
         }
         /// <summary>
@@ -133,12 +133,12 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     if (propType == typeof(string))
                     {
                         condition.CSharpTypeName = typeof(string)?.Name;
-                        condition.FieldValue = (string)value;
+                        condition.FieldValue = ((string)value).ToSqlFilter();
 
                         //日期查询
                         if (isDateQuery)
                         {
-                            condition.FieldValue += $" {timeSuffix}";
+                            condition.FieldValue += $" {timeSuffix}".ToSqlFilter();
                         }
                     }
                     //时间
@@ -175,7 +175,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     else
                     {
                         condition.CSharpTypeName = propType.Name;
-                        condition.FieldValue = value.ToString();
+                        condition.FieldValue = value.ToString().ToSqlFilter();
                     }
                     #endregion
 
