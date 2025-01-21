@@ -17,9 +17,8 @@ namespace SqlSugar.Attributes.Extension.Extensions
         /// <returns></returns>
         private static bool IsNullableType(Type type)
         {
-            return (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>)) || type == typeof(string);
+            return (type.IsValueType && Nullable.GetUnderlyingType(type) != null) || type == typeof(string);
         }
-
         /// <summary>
         /// 绑定参数
         /// </summary>
@@ -32,13 +31,17 @@ namespace SqlSugar.Attributes.Extension.Extensions
         {
             PropertyInfo prop = typeof(TEntity).GetProperty(fieldName);
 
-            if (!IsNullableType(prop.PropertyType) && value is null)
+            // 值为空，且值类型不是可空类型
+            if (value is null && !IsNullableType(prop.PropertyType))
             {
                 throw new GlobalException($"表字段【{fieldName}】更新的值不能为空!");
             }
-
-            if (value != null)
+            // 值为空，值类型为可空类型
+            // 值不为空，值类型为可空类型
+            // 值不为空，值类型为不可空类型
+            else
             {
+                //判断是否可以赋值
                 if (!prop.PropertyType.IsAssignableFrom(value.GetType()))
                     throw new GlobalException($"表字段【{fieldName}】类型与传参类型不一致!");
             }
@@ -56,7 +59,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
             // 构建一个Expression<Func<TEntity,TEntity>>的表达式树
 
             // 实体类型 相当于 lambda表达式 传入的参数
-            ParameterExpression entity = Expression.Parameter(typeof(TEntity));
+            ParameterExpression entity = Expression.Parameter(typeof(TEntity), typeof(TEntity).Name);
 
             // 参数初始化 相当于 lambda表达式 传出的返回值
             MemberInitExpression memberInit = Expression.MemberInit(Expression.New(typeof(TEntity)), assignments);
@@ -82,10 +85,8 @@ namespace SqlSugar.Attributes.Extension.Extensions
             if (!prop.PropertyType.IsAssignableFrom(value.GetType()))
                 throw new GlobalException($"表字段【{fieldName}】类型与传参类型不一致!");
 
-
-
             // 创建参数表达式
-            var parameter = Expression.Parameter(typeof(TEntity));
+            var parameter = Expression.Parameter(typeof(TEntity), typeof(TEntity).Name);
 
             // 创建等式
             var equalExpression = Expression.Equal(Expression.Property(parameter, prop), Expression.Constant(value));
@@ -159,11 +160,6 @@ namespace SqlSugar.Attributes.Extension.Extensions
         #endregion
 
         #region 更新
-
-        #region 私有方法
-
-        #endregion
-
         /// <summary>
         /// 自动Dto转实体更新
         /// </summary>
