@@ -29,24 +29,28 @@ namespace SqlSugar.Attributes.Extension.Extensions
         /// <exception cref="GlobalException"></exception>
         private static MemberAssignment BindParameter<TEntity>(string fieldName, object value)
         {
-            PropertyInfo prop = typeof(TEntity).GetProperty(fieldName);
+            PropertyInfo entityProperty = typeof(TEntity).GetProperty(fieldName);
 
             // 值为空，且值类型不是可空类型
-            if (value is null && !IsNullableType(prop.PropertyType))
+            if (value is null && !IsNullableType(entityProperty.PropertyType))
             {
                 throw new GlobalException($"表字段【{fieldName}】更新的值不能为空!");
             }
             // 值为空，值类型为可空类型
+            else if (value is null)
+            {
+                return Expression.Bind(entityProperty, Expression.Constant(null, entityProperty.PropertyType));
+            }
             // 值不为空，值类型为可空类型
             // 值不为空，值类型为不可空类型
             else
             {
                 //判断是否可以赋值
-                if (!prop.PropertyType.IsAssignableFrom(value.GetType()))
+                if (!entityProperty.PropertyType.IsAssignableFrom(value.GetType()))
                     throw new GlobalException($"表字段【{fieldName}】类型与传参类型不一致!");
             }
 
-            return Expression.Bind(prop, value != null ? Expression.Constant(value) : Expression.Constant(null, prop.PropertyType));
+            return Expression.Bind(entityProperty, Expression.Constant(value));
         }
         /// <summary>
         /// 创建更新表达式
