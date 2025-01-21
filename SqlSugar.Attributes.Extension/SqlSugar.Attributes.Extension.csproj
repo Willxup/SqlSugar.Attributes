@@ -14,7 +14,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-    <Version>1.0.9</Version>
+    <Version>1.0.10</Version>
     <Description>SqlSugar.Attributes基于SqlSugar和C#特性 配置dto模型，只需要在模型上配置表信息，即可自动拼接SQL，实现查询插入更新等功能，实现高效项目开发和迭代。</Description>
   </PropertyGroup>
 
