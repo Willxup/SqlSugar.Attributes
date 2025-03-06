@@ -23,12 +23,23 @@ public class Search
 {
 	//[DbTableAlias("t")] //表别名，多表关联使用，单表需要查询时指定表别名
 	[DbQueryField("t_Name")] //字段名
-	[DbQueryOperator(DbOperator.Like)]  //操作符, Like查询
+	[DbQueryOperator(DbOperator.Like)]  //操作符, Like 查询
 	public string Name { get; set; }
+    
 	//[DbTableAlias("t")] //表别名，多表关联使用，单表需要查询时指定表别名
 	[DbQueryField("t_CodeId")] //字段名
-	[DbQueryOperator(DbOperator.In)] //操作符，IN查询
+	[DbQueryOperator(DbOperator.In)] //操作符，IN 查询
 	public List<long> CodeIds { get; set; }
+    
+    //[DbTableAlias("t")] //表别名，多表关联使用，单表需要查询时指定表别名
+    [DbQueryField("t_Time", DbTimeSuffixType.StartTime)] //字段名+时间后缀，会自动拼接00:00:00
+    [DbQueryOperator(DbOperator.GreaterThanOrEqual)] //操作符，>= 查询
+    public DateTime? StartTime { get; set; } //DateTime和string类型都支持自动拼接后缀查询
+    
+    //[DbTableAlias("t")] //表别名，多表关联使用，单表需要查询时指定表别名
+    [DbQueryField("t_Time", DbTimeSuffixType.EndTime)] //字段名+时间后缀，会自动拼接23:59:59
+    [DbQueryOperator(DbOperator.LessThanOrEqual)] //操作符，<= 查询
+    public DateTime? EndTime { get; set; } //DateTime和string类型都支持自动拼接后缀查询
 }
 ```
 
@@ -40,14 +51,19 @@ public class Result
 	//[DbTableAlias("t")] //表别名，多表关联使用，单表需要查询时指定表别名
 	[DbQueryField("t_Id")] //字段名
 	public long Id { get; set; }
+    
 	//[DbTableAlias("t")] //表别名，多表关联使用，单表需要查询时指定表别名
 	[DbQueryField("t_Name")] //字段名
 	public string Name { get; set; }
+    
     //子查询，如果指定了表别名，可以使用表别名，否则直接写表名
 	//[DbSubQuery("(SELECT name FROM Table_Name2 WHERE t.t_Id = Id)")]
     [DbSubQuery("(SELECT name FROM Table_Name2 WHERE Table_Name.t_Id = Id)")]
     public string OtherName { get; set; }
-}
+    
+    //[DbTableAlias("t")] //表别名，多表关联使用，单表需要查询时指定表别名
+	[DbQueryField("t_IsDelete", true)] //字段名+布尔值结果
+    public bool IsDelete { get; set; }
 ```
 
 
@@ -83,9 +99,11 @@ public class Test
 SELECT 
 t_Id as Id, 
 t_Name as Name, 
-(SELECT name FROM Table_Name2 WHERE Table_Name.t_Id = Id) AS OtherName
+(SELECT name FROM Table_Name2 WHERE Table_Name.t_Id = Id) AS OtherName,
+IF(t_IsDelete = 1, TRUE, FALSE) AS IsDelete
 FROM Table_Name
-WHERE t_Name LIKE '%@Name%' AND t_CodeId IN (@CodeIds)
+WHERE t_Name LIKE '%@Name%' AND t_CodeId IN (@CodeIds) 
+AND t_Time >= "@StartTime" AND t_Time <= "@EndTime"
 ORDER BY t_Name DESC;
 ```
 
@@ -97,9 +115,11 @@ ORDER BY t_Name DESC;
 SELECT 
 t.t_Id as Id, 
 t.t_Name as Name,
-(SELECT name FROM Table_Name2 WHERE t.t_Id = Id) AS OtherName
+(SELECT name FROM Table_Name2 WHERE t.t_Id = Id) AS OtherName,
+IF(t.t_IsDelete = 1, TRUE, FALSE) AS IsDelete
 FROM Table_Name t
 WHERE t.t_Name LIKE '%@Name%' AND t.t_CodeId IN (@CodeIds)
+AND t.t_Time >= "@StartTime" AND t.t_Time <= "@EndTime"
 ORDER BY t.t_Name DESC;
 ```
 
