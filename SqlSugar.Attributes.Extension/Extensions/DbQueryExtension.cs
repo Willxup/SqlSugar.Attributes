@@ -74,6 +74,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                         continue;
                     #endregion
 
+                    //条件
                     ConditionalModel condition = new ConditionalModel();
 
                     //是否为日期查询，用于string类型
@@ -106,6 +107,10 @@ namespace SqlSugar.Attributes.Extension.Extensions
                             {
                                 timeSuffix = !string.IsNullOrWhiteSpace(attr.GetTimeSuffix()) ? attr.GetTimeSuffix() : "23:59:59";
                             }
+                            else
+                            {
+                                throw new GlobalException($"[{prop.Name}]配置的时间后缀类型有误!");
+                            }
                         }
                     }
                     //未配置DbQueryField，直接取字段名称
@@ -122,7 +127,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                         condition.ConditionalType = attr.GetDbOperator();
                     }
                     else
-                        throw new GlobalException($"请配置{prop.Name}操作符!");
+                        throw new GlobalException($"请配置[{prop.Name}]操作符!");
                     #endregion
 
                     #region 参数赋值
@@ -144,8 +149,16 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     //时间
                     else if (propType == typeof(DateTime) || propType == typeof(DateTime?))
                     {
-                        condition.CSharpTypeName = typeof(DateTime)?.Name;
-                        condition.FieldValue = ((DateTime)value).ToFormattedString();
+                        if (isDateQuery)
+                        {
+                            condition.CSharpTypeName = typeof(string)?.Name;
+                            condition.FieldValue = $"{((DateTime)value).ToFormattedString("yyyy-MM-dd")} {timeSuffix}".ToSqlFilter();
+                        }
+                        else
+                        {
+                            condition.CSharpTypeName = typeof(DateTime)?.Name;
+                            condition.FieldValue = ((DateTime)value).ToFormattedString();
+                        }
                     }
                     //布尔值
                     else if (propType == typeof(bool) || propType == typeof(bool?))
@@ -241,10 +254,13 @@ namespace SqlSugar.Attributes.Extension.Extensions
                             throw new GlobalException("请使用[DbSubQueryAttribute]子查询!");
                         }
 
-                        //如果为布尔值，转换为布尔值
-                        if (attr.IsBoolValue() && attr.GetTrueValue() != null)
+                        //如果为布尔值结果(查询结果)，转换结果
+                        if (attr.IsBoolResult())
                         {
-                            sql = "IF(" + sql + "`" + fieldName + "`" + $" = {attr.GetTrueValue()}, " + "TRUE, FALSE)";
+                            if (prop.PropertyType != typeof(bool) && prop.PropertyType != typeof(bool?))
+                                throw new GlobalException($"[{prop.Name}]属性类型必须为布尔值类型才可使用[IsBoolResult]功能!");
+
+                            sql = "IF(" + sql + "`" + fieldName + "`" + $" = {attr.GetBoolTrueValue()}, " + "TRUE, FALSE)";
                         }
                         else
                         {
