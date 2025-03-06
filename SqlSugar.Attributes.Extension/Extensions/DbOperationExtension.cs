@@ -34,7 +34,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
             // 值为空，且值类型不是可空类型
             if (value is null && !IsNullableType(entityProperty.PropertyType))
             {
-                throw new GlobalException($"表字段【{fieldName}】更新的值不能为空!");
+                throw new GlobalException($"表字段[{fieldName}]更新的值不能为空!");
             }
             // 值为空，值类型为可空类型
             else if (value is null)
@@ -47,7 +47,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
             {
                 //判断是否可以赋值
                 if (!entityProperty.PropertyType.IsAssignableFrom(value.GetType()))
-                    throw new GlobalException($"表字段【{fieldName}】类型与传参类型不一致!");
+                    throw new GlobalException($"表字段[{fieldName}]类型与传参类型不一致!");
             }
 
             return Expression.Bind(entityProperty, Expression.Constant(value));
@@ -81,13 +81,13 @@ namespace SqlSugar.Attributes.Extension.Extensions
         private static Expression<Func<TEntity, bool>> CreateUpdateWhereExpression<TEntity>(string fieldName, object value)
         {
             if (value == null)
-                throw new GlobalException($"表字段【{fieldName}】的值不能为空!");
+                throw new GlobalException($"表字段[{fieldName}]的值不能为空!");
 
             // 获取属性
             PropertyInfo prop = typeof(TEntity).GetProperty(fieldName);
 
             if (!prop.PropertyType.IsAssignableFrom(value.GetType()))
-                throw new GlobalException($"表字段【{fieldName}】类型与传参类型不一致!");
+                throw new GlobalException($"表字段[{fieldName}]类型与传参类型不一致!");
 
             // 创建参数表达式
             var parameter = Expression.Parameter(typeof(TEntity), typeof(TEntity).Name);
@@ -231,7 +231,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     else
                     {
                         if (value is null)
-                            throw new GlobalException($"未标记特性的字段【{prop.Name}】的值不能为空!");
+                            throw new GlobalException($"未标记特性的字段[{prop.Name}]的值不能为空!");
 
                         assignments.Add(BindParameter<TEntity>(prop.Name, value));
                     }
