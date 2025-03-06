@@ -18,21 +18,21 @@ namespace SqlSugar.Attributes.Extension.Extensions.Attributes.Query
         /// </summary>
         private readonly bool _isDateQuery = false;
         /// <summary>
-        /// 时间前缀类型(开始/结束)
+        /// 时间后缀类型(开始/结束)
         /// </summary>
         private readonly DbTimeSuffixType _suffixType;
         /// <summary>
-        /// 时间前缀
+        /// 时间后缀
         /// </summary>
         private readonly string _timeSuffix = "";
         /// <summary>
-        /// 结果是否为布尔值(查询结果)
+        /// 是否为布尔值结果(查询结果)
         /// </summary>
-        private readonly bool _isBoolValue = false;
+        private readonly bool _isBoolResult = false;
         /// <summary>
         /// 当结果为布尔值时的true值(查询结果)
         /// </summary>
-        private readonly int? _trueValue = null;
+        private readonly int? _boolTrueValue = null;
 
         /// <summary>
         /// 构造
@@ -41,18 +41,6 @@ namespace SqlSugar.Attributes.Extension.Extensions.Attributes.Query
         public DbQueryFieldAttribute(string fieldName)
         {
             _fieldName = DbUtilities.IsNullDbFieldName(fieldName);
-        }
-        /// <summary>
-        /// 构造
-        /// </summary>
-        /// <param name="fieldName">表字段名称</param>
-        /// <param name="isBoolValue">是否为布尔值</param>
-        /// <param name="trueValue">true值(当数据库与传入值相同时为TRUE)[注：数据库如果[0否1是]可直接转换，使用上面的构造即可]</param>
-        public DbQueryFieldAttribute(string fieldName, bool isBoolValue, int trueValue)
-        {
-            _fieldName = fieldName;
-            _isBoolValue = isBoolValue;
-            _trueValue = trueValue;
         }
         /// <summary>
         /// 构造
@@ -67,7 +55,18 @@ namespace SqlSugar.Attributes.Extension.Extensions.Attributes.Query
             _suffixType = suffixType;
             _timeSuffix = timeSuffix;
         }
-
+        /// <summary>
+        /// 构造
+        /// </summary>
+        /// <param name="fieldName">表字段名称</param>
+        /// <param name="isBoolResult">是否为布尔值结果</param>
+        /// <param name="boolTrueValue">布尔[true]值(当数据库与传入值相同时为TRUE，默认1为true)[注：数据库如果[0否1是]可直接转换，使用上面的构造即可]</param>
+        public DbQueryFieldAttribute(string fieldName, bool isBoolResult, int boolTrueValue = 1)
+        {
+            _fieldName = fieldName;
+            _isBoolResult = isBoolResult;
+            _boolTrueValue = boolTrueValue;
+        }
 
         /// <summary>
         /// 获取表字段名
@@ -78,22 +77,6 @@ namespace SqlSugar.Attributes.Extension.Extensions.Attributes.Query
             return _fieldName;
         }
         /// <summary>
-        /// 是否为布尔值
-        /// </summary>
-        /// <returns></returns>
-        public bool IsBoolValue()
-        {
-            return _isBoolValue;
-        }
-        /// <summary>
-        /// 获取True值
-        /// </summary>
-        /// <returns></returns>
-        public int? GetTrueValue()
-        {
-            return _trueValue;
-        }
-        /// <summary>
         /// 是否为时间查询
         /// </summary>
         /// <returns></returns>
@@ -102,7 +85,7 @@ namespace SqlSugar.Attributes.Extension.Extensions.Attributes.Query
             return _isDateQuery;
         }
         /// <summary>
-        /// 获取时间前缀类型
+        /// 获取时间后缀类型
         /// </summary>
         /// <returns></returns>
         public DbTimeSuffixType GetTimeSuffixType()
@@ -110,12 +93,28 @@ namespace SqlSugar.Attributes.Extension.Extensions.Attributes.Query
             return _suffixType;
         }
         /// <summary>
-        /// 获取时间前缀
+        /// 获取时间后缀
         /// </summary>
         /// <returns></returns>
         public string GetTimeSuffix()
         {
             return _timeSuffix;
+        }
+        /// <summary>
+        /// 是否为布尔值结果
+        /// </summary>
+        /// <returns></returns>
+        public bool IsBoolResult()
+        {
+            return _isBoolResult;
+        }
+        /// <summary>
+        /// 获取布尔[true]值
+        /// </summary>
+        /// <returns></returns>
+        public int? GetBoolTrueValue()
+        {
+            return _boolTrueValue;
         }
     }
 }
