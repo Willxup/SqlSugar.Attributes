@@ -8,11 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MySqlConnector" Version="2.2.5" />
+    <ProjectReference Include="..\SqlSugar.Attributes.Extension\SqlSugar.Attributes.Extension.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SqlSugar.Attributes.Extension\SqlSugar.Attributes.Extension.csproj" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.4" />
   </ItemGroup>
 
 </Project>
