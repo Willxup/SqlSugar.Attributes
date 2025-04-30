@@ -3,7 +3,10 @@ using System.ComponentModel.Design;
 
 namespace SqlSugar.Attributes.Test
 {
-    public class InitData
+    /// <summary>
+    /// Initial Data
+    /// </summary>
+    public static class InitData
     {
         public static void Init()
         {

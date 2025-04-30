@@ -2,9 +2,9 @@
 
 namespace SqlSugar.Attributes.Test
 {
-    internal class Program
+    internal static class Program
     {
-        static async Task Main(string[] args)
+        private static async Task Main(string[] args)
         {
             InitData.Init();
 

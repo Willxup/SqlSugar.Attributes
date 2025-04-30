@@ -4,7 +4,10 @@ using SqlSugar.Attributes.Test.Models;
 
 namespace SqlSugar.Attributes.Test.Test
 {
-    public class UpdateTest
+    /// <summary>
+    /// Update Test
+    /// </summary>
+    public static class UpdateTest
     {
         public static async Task Test()
         {
@@ -18,9 +21,9 @@ namespace SqlSugar.Attributes.Test.Test
                 CreateTime = null
             };
 
-            bool isSucess = db.Updateable<UpdateUserDto, User>(dto).ExecuteCommandHasChange();
+            bool isSuccess = await db.Updateable<UpdateUserDto, User>(dto).ExecuteCommandHasChangeAsync();
 
-            Console.WriteLine($"Update Test1 Result = {isSucess}");
+            Console.WriteLine($"Update Test1 Result = {isSuccess}");
         }
     }
 }

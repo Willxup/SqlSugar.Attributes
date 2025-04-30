@@ -4,7 +4,10 @@ using SqlSugar.Attributes.Test.Models;
 
 namespace SqlSugar.Attributes.Test.Test
 {
-    public class InsertTest
+    /// <summary>
+    /// Insert Test
+    /// </summary>
+    public static class InsertTest
     {
         public static async Task Test()
         {
