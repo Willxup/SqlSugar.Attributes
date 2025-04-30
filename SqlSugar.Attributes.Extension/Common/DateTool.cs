@@ -10,6 +10,7 @@ namespace SqlSugar.Attributes.Extension.Common
         /// </summary>
         /// <param name="datetime"></param>
         /// <param name="format"></param>
+        /// <param name="defaultValue"></param>
         /// <returns></returns>
         public static string ToFormattedString(this DateTime? datetime, string format = "yyyy-MM-dd HH:mm:ss", DateTime? defaultValue = null)
         {

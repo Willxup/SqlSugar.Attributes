@@ -22,15 +22,11 @@
         /// <summary>
         /// 是否为数据库排序方式
         /// </summary>
-        /// <param name="sortway"></param>
+        /// <param name="sortWay"></param>
         /// <returns></returns>
-        internal static bool IsDbSortWay(string sortway)
+        internal static bool IsDbSortWay(string sortWay)
         {
-            if (sortway.ToUpper() == DbSortWay.ASC.ToString() || sortway.ToUpper() == DbSortWay.DESC.ToString())
-            {
-                return true;
-            }
-            return false;
+            return sortWay.ToUpper() == nameof(DbSortWay.ASC) || sortWay.ToUpper() == nameof(DbSortWay.DESC);
         }
     }
 }
