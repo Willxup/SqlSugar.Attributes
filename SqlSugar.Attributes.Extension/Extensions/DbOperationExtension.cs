@@ -233,7 +233,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     else
                     {
                         if (value is null)
-                            throw new GlobalException($"未标记特性的字段[{prop.Name}]的值不能为空!");
+                            continue;
 
                         assignments.Add(BindParameter<TEntity>(prop.Name, value));
                     }
