@@ -29,8 +29,9 @@ namespace SqlSugar.Attributes.Extension.Extensions
         /// <exception cref="GlobalException"></exception>
         private static MemberAssignment BindParameter<TEntity>(string fieldName, object value)
         {
-            PropertyInfo entityProperty = typeof(TEntity).GetProperty(fieldName);
-
+            PropertyInfo entityProperty = typeof(TEntity).GetProperty(fieldName) 
+                ?? throw new GlobalException($"表字段[{fieldName}]不存在!");
+            
             // 值为空，且值类型不是可空类型
             if (value is null && !IsNullableType(entityProperty.PropertyType))
             {
@@ -84,7 +85,8 @@ namespace SqlSugar.Attributes.Extension.Extensions
                 throw new GlobalException($"表字段[{fieldName}]的值不能为空!");
 
             // 获取属性
-            PropertyInfo prop = typeof(TEntity).GetProperty(fieldName);
+            PropertyInfo prop = typeof(TEntity).GetProperty(fieldName)
+                ?? throw new GlobalException($"表字段[{fieldName}]不存在!");
 
             if (!prop.PropertyType.IsAssignableFrom(value.GetType()))
                 throw new GlobalException($"表字段[{fieldName}]类型与传参类型不一致!");
@@ -116,7 +118,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
             //获取DTO模型属性
             var props = dto.GetType().GetProperties();
 
-            if (props?.Length > 0)
+            if (props.Length > 0)
             {
                 Dictionary<string, object> fields = new Dictionary<string, object>();
 
@@ -132,7 +134,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
 
                     #region 表字段获取及参数赋值
                     //获取参数值
-                    var value = prop.GetValue(dto) ?? null;
+                    var value = prop.GetValue(dto);
 
                     //判断参数值是否为字符串，如果是字符串且为空
                     if (value is string stringValue && string.IsNullOrEmpty(stringValue))
@@ -143,12 +145,12 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     {
                         var attr = prop.GetCustomAttributes(typeof(DbOperationFieldAttribute), true)[0] as DbOperationFieldAttribute;
 
-                        fields.Add(attr.GetFieldName(), value); ;
+                        fields.Add(attr!.GetFieldName(), value);
                     }
                     //未配置DbOperationField，直接取字段名称
                     else
                     {
-                        fields.Add(prop.Name, value); ;
+                        fields.Add(prop.Name, value);
                     }
                     #endregion
 
@@ -180,7 +182,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
             //获取DTO模型属性
             var props = dto.GetType().GetProperties();
 
-            if (props?.Length > 0)
+            if (props.Length > 0)
             {
                 bool haveCondition = false;
                 List<MemberAssignment> assignments = new List<MemberAssignment>();
@@ -198,7 +200,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
 
                     #region 表字段获取及参数赋值
                     //获取参数值
-                    var value = prop.GetValue(dto) ?? null;
+                    var value = prop.GetValue(dto);
 
                     //判断参数值是否为字符串，如果是字符串且为空
                     if (value is string stringValue && string.IsNullOrEmpty(stringValue))
@@ -209,7 +211,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                         var attr = prop.GetCustomAttributes(typeof(DbOperationFieldAttribute), true)[0] as DbOperationFieldAttribute;
 
                         //参数是否允许更新为空,不允许更新为空，就直接忽略该字段不进行更新
-                        if (!attr.IsAllowEmpty())
+                        if (!attr!.IsAllowEmpty())
                         {
                             if (value is null)
                                 continue;
@@ -271,7 +273,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
             //获取DTO模型属性
             var props = dto.GetType().GetProperties();
 
-            if (props?.Length > 0)
+            if (props.Length > 0)
             {
 
                 List<string> conditions = new List<string>();
@@ -289,7 +291,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
 
                     #region 表字段获取及参数赋值
                     //获取参数值
-                    var value = prop.GetValue(dto) ?? null;
+                    var value = prop.GetValue(dto);
 
                     //判断参数值是否为字符串，如果是字符串且为空
                     if (value is string stringValue && string.IsNullOrEmpty(stringValue))
@@ -300,7 +302,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                         var attr = prop.GetCustomAttributes(typeof(DbOperationFieldAttribute), true)[0] as DbOperationFieldAttribute;
 
                         //参数是否允许更新为空,不允许更新为空，就直接忽略该字段不进行更新
-                        if (!attr.IsAllowEmpty())
+                        if (!attr!.IsAllowEmpty())
                         {
                             if (value is null)
                                 continue;
