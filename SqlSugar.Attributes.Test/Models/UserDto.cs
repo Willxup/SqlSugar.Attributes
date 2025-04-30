@@ -4,85 +4,110 @@ using SqlSugar.Attributes.Extension.Extensions.Attributes.Query;
 
 namespace SqlSugar.Attributes.Test.Models
 {
-
+    /// <summary>
+    /// User Query Condition Dto
+    /// </summary>
     public class UserPageSearch : DbQueryModel
     {
         /// <summary>
-        /// 姓名
+        /// Name
         /// </summary>
         [DbTableAlias("user")]
         [DbQueryField("UserName")]
         [DbQueryOperator(DbOperator.Like)]
         public string Name { get; set; }
+
+        /// <summary>
+        /// Email
+        /// </summary>
         [DbTableAlias("user")]
         [DbQueryField("Email")]
         [DbQueryOperator(DbOperator.Like)]
         public string Email { get; set; }
     }
+
+    /// <summary>
+    /// User Query Result Dto
+    /// </summary>
     public class UserPageResult
     {
         /// <summary>
-        /// 用户Id
+        /// User Id
         /// </summary>
         [DbTableAlias("user")]
         [DbQueryField("UserId")]
-        public long? Id { get; set; }
+        public int? Id { get; set; }
+
         /// <summary>
-        /// 姓名
+        /// Name
         /// </summary>
         [DbTableAlias("user")]
         [DbQueryField("UserName")]
         public string Name { get; set; }
+
         /// <summary>
-        /// 邮箱
+        /// Email
         /// </summary>
         [DbTableAlias("user")]
         [DbQueryField("Email")]
         public string Email { get; set; }
+
         /// <summary>
-        /// 角色名
+        /// Role name
         /// </summary>
         [DbTableAlias("role")]
         [DbQueryField("RoleName")]
         public string RoleName { get; set; }
     }
 
+    /// <summary>
+    /// User Insert Dto
+    /// </summary>
     public class InsertUserDto
     {
         /// <summary>
-        /// 姓名
+        /// UserId
         /// </summary>
         [DbOperationField("UserName")]
         public string Name { get; set; }
+
         /// <summary>
-        /// 邮箱
+        /// Email
         /// </summary>
         [DbOperationField("Email", false, true)]
         public string Email { get; set; }
+
         /// <summary>
-        /// 时间
+        /// Create time
         /// </summary>
         public DateTime? CreateTime { get; set; }
     }
+
+    /// <summary>
+    /// User Update Dto
+    /// </summary>
     public class UpdateUserDto
     {
         /// <summary>
-        /// 用户Id
+        /// UserId
         /// </summary>
         [DbOperationField("UserId", true)]
-        public long? Id { get; set; }
+        public int? Id { get; set; }
+
         /// <summary>
-        /// 姓名
+        /// Name
         /// </summary>
         [DbOperationField("UserName")]
         public string Name { get; set; }
+
         /// <summary>
-        /// 邮箱
+        /// Email
         /// </summary>
-        [DbOperationField("Email", false ,true)]
+        [DbOperationField("Email", false, true)]
         public string Email { get; set; }
+
         /// <summary>
-        /// 时间
+        /// Create time
         /// </summary>
         public DateTime? CreateTime { get; set; }
     }

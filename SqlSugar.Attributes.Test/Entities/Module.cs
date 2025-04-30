@@ -1,20 +1,23 @@
 ﻿namespace SqlSugar.Attributes.Test.Entities
 {
+    /// <summary>
+    /// Module
+    /// </summary>
     [SugarTable("Module")]
     public class Module
     {
         /// <summary>
-        /// 模块Id
+        /// Module Id
         /// </summary>
         [SugarColumn(IsIdentity = true, IsPrimaryKey = true)]
-        public long ModuleId { get; set; }
+        public int ModuleId { get; set; }
         /// <summary>
-        /// 模块名
+        /// Module name
         /// </summary>
         [SugarColumn(Length = 50, IsNullable = false)]
         public string ModuleName { get; set; }
         /// <summary>
-        /// 创建日期
+        /// Create time
         /// </summary>
         [SugarColumn(IsNullable = false, InsertServerTime = true)]
         public DateTime CreateTime { get; set; }

@@ -1,30 +1,33 @@
 ﻿namespace SqlSugar.Attributes.Test.Entities
 {
+    /// <summary>
+    /// Role Permission
+    /// </summary>
     [SugarTable("RolePermission")]
     public class RolePermission
     {
         /// <summary>
-        /// 角色权限Id
+        /// Role Permission Id
         /// </summary>
         [SugarColumn(IsIdentity = true, IsPrimaryKey = true)]
-        public long RolePermissionId { get; set; }
+        public int RolePermissionId { get; set; }
         /// <summary>
-        /// 角色Id
+        /// Role Id
         /// </summary>
         [SugarColumn(IsNullable = false)]
-        public long RoleId { get; set; }
+        public int RoleId { get; set; }
         /// <summary>
-        /// 模块Id
+        /// Module Id
         /// </summary>
         [SugarColumn(IsNullable = false)]
-        public long ModuleId { get; set; }
+        public int ModuleId { get; set; }
         /// <summary>
-        /// 角色权限名称
+        /// Role permission name
         /// </summary>
         [SugarColumn(Length = 50, IsNullable = true)]
         public string RolePermissionName { get; set; }
         /// <summary>
-        /// 创建日期
+        /// Create time
         /// </summary>
         [SugarColumn(IsNullable = false, InsertServerTime = true)]
         public DateTime CreateTime { get; set; }
