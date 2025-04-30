@@ -14,11 +14,11 @@ namespace SqlSugar.Attributes.Test.Test
         {
             var db = DbContext.GetDb();
 
-            // 前端传入
+            // mock front-end input
             UserPageSearch search = new()
             {
                 Name = "test",
-                Email = "" //表示不查询
+                Email = "" // Not query
             };
 
             var result = await db.Queryable<User>()
