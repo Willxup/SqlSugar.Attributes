@@ -3,6 +3,7 @@ using SqlSugar.Attributes.Extension.Extensions.Attributes.Query;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SqlSugar.Attributes.Extension.Extensions
@@ -32,10 +33,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
         /// <returns></returns>
         private static IEnumerable<string> GetListElements(IEnumerable list)
         {
-            foreach (var item in list)
-            {
-                yield return item.ToString().ToSqlFilter();
-            }
+            return from object item in list select item.ToString().ToSqlFilter();
         }
         /// <summary>
         /// 获取查询条件参数
@@ -51,7 +49,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
             //获取查询条件模型属性
             var props = search.GetType().GetProperties();
 
-            if (props?.Length > 0)
+            if (props.Length > 0)
             {
                 foreach (var prop in props)
                 {
@@ -86,14 +84,14 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     if (prop.IsDefined(typeof(DbTableAliasAttribute), true))
                     {
                         var attr = prop.GetCustomAttributes(typeof(DbTableAliasAttribute), true)[0] as DbTableAliasAttribute;
-                        condition.FieldName += attr.GetTableAlias() + ".";
+                        condition.FieldName += attr!.GetTableAlias() + ".";
                     }
 
                     //表字段名
                     if (prop.IsDefined(typeof(DbQueryFieldAttribute), true))
                     {
                         var attr = prop.GetCustomAttributes(typeof(DbQueryFieldAttribute), true)[0] as DbQueryFieldAttribute;
-                        condition.FieldName += attr.GetFieldName();
+                        condition.FieldName += attr!.GetFieldName();
 
                         //日期查询
                         if (attr.IsDateQuery())
@@ -124,7 +122,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     if (prop.IsDefined(typeof(DbQueryOperatorAttribute), true))
                     {
                         var attr = prop.GetCustomAttributes(typeof(DbQueryOperatorAttribute), true)[0] as DbQueryOperatorAttribute;
-                        condition.ConditionalType = attr.GetDbOperator();
+                        condition.ConditionalType = attr!.GetDbOperator();
                     }
                     else
                         throw new GlobalException($"请配置[{prop.Name}]操作符!");
@@ -137,7 +135,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     //字符串
                     if (propType == typeof(string))
                     {
-                        condition.CSharpTypeName = typeof(string)?.Name;
+                        condition.CSharpTypeName = nameof(String);
                         condition.FieldValue = ((string)value).ToSqlFilter();
 
                         //日期查询
@@ -151,19 +149,19 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     {
                         if (isDateQuery)
                         {
-                            condition.CSharpTypeName = typeof(string)?.Name;
+                            condition.CSharpTypeName = nameof(String);
                             condition.FieldValue = $"{((DateTime)value).ToFormattedString("yyyy-MM-dd")} {timeSuffix}".ToSqlFilter();
                         }
                         else
                         {
-                            condition.CSharpTypeName = typeof(DateTime)?.Name;
+                            condition.CSharpTypeName = nameof(DateTime);
                             condition.FieldValue = ((DateTime)value).ToFormattedString();
                         }
                     }
                     //布尔值
                     else if (propType == typeof(bool) || propType == typeof(bool?))
                     {
-                        condition.CSharpTypeName = typeof(bool)?.Name;
+                        condition.CSharpTypeName = nameof(Boolean);
                         condition.FieldValue = ((bool)value).ToString();
                     }
                     //基础类型
@@ -181,7 +179,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     //集合
                     else if (value is IEnumerable enumerable)
                     {
-                        condition.CSharpTypeName = propType.GetGenericArguments()?[0]?.Name; //获取泛型类型
+                        condition.CSharpTypeName = propType.GetGenericArguments()[0].Name; //获取泛型类型
                         condition.FieldValue = string.Join(",", GetListElements(enumerable));
                     }
                     //其他类型
@@ -205,14 +203,14 @@ namespace SqlSugar.Attributes.Extension.Extensions
         /// <param name="result"></param>
         /// <returns></returns>
         /// <exception cref="GlobalException"></exception>
-        private static string GetSelectSQL<TResult>(this TResult result)
+        private static string GetSelectSql<TResult>(this TResult result)
         {
             StringBuilder select = new StringBuilder();
 
             // 获取查询模型属性
             var props = result.GetType().GetProperties();
 
-            if (props?.Length > 0)
+            if (props.Length > 0)
             {
                 foreach (var prop in props)
                 {
@@ -239,7 +237,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                             throw new GlobalException("使用[DbSubQueryAttribute]子查询时，请去除[DbTableAliasAttribute]!");
 
 
-                        sql += "`" + attr.GetTableAlias() + "`" + ".";
+                        sql += "`" + attr!.GetTableAlias() + "`" + ".";
                     }
 
                     //表字段名
@@ -247,7 +245,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     {
                         var attr = prop.GetCustomAttributes(typeof(DbQueryFieldAttribute), true)[0] as DbQueryFieldAttribute;
 
-                        string fieldName = attr.GetFieldName();
+                        string fieldName = attr!.GetFieldName();
 
                         if (fieldName.ToUpper().Contains("SELECT") || fieldName.ToUpper().Contains("FROM") || fieldName.ToUpper().Contains("WHERE"))
                         {
@@ -272,7 +270,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     {
                         var attr = prop.GetCustomAttributes(typeof(DbSubQueryAttribute), true)[0] as DbSubQueryAttribute;
 
-                        sql += "(" + attr.GetSubQuery() + ")";
+                        sql += "(" + attr!.GetSubQuery() + ")";
                     }
                     // 未配置DbQueryField和DbSubQuery，直接取字段名称
                     else
@@ -305,14 +303,14 @@ namespace SqlSugar.Attributes.Extension.Extensions
         /// <param name="result"></param>
         /// <returns></returns>
         /// <exception cref="GlobalException"></exception>
-        public static string GetGroupBySql<TResult>(this TResult result)
+        private static string GetGroupBySql<TResult>(this TResult result)
         {
-            StringBuilder groupby = new StringBuilder();
+            StringBuilder groupBy = new StringBuilder();
 
             // 获取查询模型属性
             var props = result.GetType().GetProperties();
 
-            if (props?.Length > 0)
+            if (props.Length > 0)
             {
                 foreach (var prop in props)
                 {
@@ -330,7 +328,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
 
                         //是否使用查询特性参数
                         //不使用查询特性
-                        if (!groupByAttr.IsUseQueryFieldAttribute())
+                        if (!groupByAttr!.IsUseQueryFieldAttribute())
                         {
                             //表别名
                             string tableAlias = groupByAttr.GetTableAlias();
@@ -352,7 +350,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
 
                                 var attr = prop.GetCustomAttributes(typeof(DbTableAliasAttribute), true)[0] as DbTableAliasAttribute;
 
-                                sql += "`" + attr.GetTableAlias() + "`" + ".";
+                                sql += "`" + attr!.GetTableAlias() + "`" + ".";
                             }
 
                             //表字段名
@@ -360,7 +358,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                             {
                                 var attr = prop.GetCustomAttributes(typeof(DbQueryFieldAttribute), true)[0] as DbQueryFieldAttribute;
 
-                                sql += "`" + attr.GetFieldName() + "`";
+                                sql += "`" + attr!.GetFieldName() + "`";
                             }
                             // 未配置DbQueryField，直接取字段名称
                             else
@@ -372,16 +370,16 @@ namespace SqlSugar.Attributes.Extension.Extensions
                         //拼接sql
                         if (!string.IsNullOrEmpty(sql))
                         {
-                            groupby.Append(sql + ", ");
+                            groupBy.Append(sql + ", ");
                         }
                     }
                 }
             }
 
             //校验是否存在GROUP BY内容
-            if (groupby.Length > 0)
+            if (groupBy.Length > 0)
             {
-                return groupby.Remove(groupby.Length - 2, 2).ToString();
+                return groupBy.Remove(groupBy.Length - 2, 2).ToString();
             }
 
             return string.Empty;
@@ -414,7 +412,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
         /// <returns></returns>
         public static ISugarQueryable<TResult> Select<T, TResult>(this ISugarQueryable<T> queryable, TResult result)
         {
-            return queryable.Select<TResult>(result.GetSelectSQL());
+            return queryable.Select<TResult>(result.GetSelectSql());
         }
         #endregion
 
@@ -431,13 +429,12 @@ namespace SqlSugar.Attributes.Extension.Extensions
         {
             object[] sort = search.GetType().GetCustomAttributes(typeof(DbDefaultOrderByAttribute), true);
 
-            if (sort?.Length > 0)
+            if (sort.Length > 0)
             {
                 foreach (var item in sort)
                 {
-                    var attr = item as DbDefaultOrderByAttribute;
-
-                    queryable = queryable.OrderBy($"{attr.GetOrderField()} {attr.GetSortWay()}");
+                    if(item is DbDefaultOrderByAttribute attr && !string.IsNullOrEmpty(attr.GetOrderField()))
+                        queryable = queryable.OrderBy($"{attr.GetOrderField()} {attr.GetSortWay()}");
                 }
             }
 
@@ -477,13 +474,13 @@ namespace SqlSugar.Attributes.Extension.Extensions
         {
             object[] condition = result.GetType().GetCustomAttributes(typeof(DbHavingAttribute), true);
 
-            if (condition?.Length > 0)
+            if (condition.Length > 0)
             {
                 foreach (var item in condition)
                 {
                     var attr = item as DbHavingAttribute;
 
-                    queryable = queryable.Having($"{attr.GetCondition()}");
+                    queryable = queryable.Having($"{attr!.GetCondition()}");
                 }
             }
 
