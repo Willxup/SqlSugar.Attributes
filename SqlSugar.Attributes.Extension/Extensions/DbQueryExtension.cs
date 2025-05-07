@@ -3,7 +3,6 @@ using SqlSugar.Attributes.Extension.Extensions.Attributes.Query;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace SqlSugar.Attributes.Extension.Extensions
@@ -33,7 +32,10 @@ namespace SqlSugar.Attributes.Extension.Extensions
         /// <returns></returns>
         private static IEnumerable<string> GetListElements(IEnumerable list)
         {
-            return from object item in list select item.ToString().ToSqlFilter();
+            foreach (var item in list)
+            {
+                yield return item.ToString().ToSqlFilter();
+            }
         }
         /// <summary>
         /// 获取查询条件参数
