@@ -48,7 +48,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
         {
             List<IConditionalModel> conditions = new List<IConditionalModel>();
 
-            //获取查询条件模型属性
+            // 获取查询条件模型属性
             var props = search.GetType().GetProperties();
 
             if (props.Length > 0)
@@ -56,46 +56,46 @@ namespace SqlSugar.Attributes.Extension.Extensions
                 foreach (var prop in props)
                 {
                     #region 参数校验
-                    //校验是否为忽略字段
+                    // 校验是否为忽略字段
                     if (prop.GetCustomAttributes(typeof(DbIgnoreFieldAttribute), true).Length > 0)
                         continue;
                     #endregion
 
                     #region 获取参数值
-                    //获取属性值
+                    // 获取属性值
                     var value = prop.GetValue(search);
 
-                    //null校验
+                    // null校验
                     if (value is null)
                         continue;
 
-                    //空字符串校验
+                    // 空字符串校验
                     if (value is string stringValue && string.IsNullOrWhiteSpace(stringValue))
                         continue;
                     #endregion
 
-                    //条件
+                    // 条件
                     ConditionalModel condition = new ConditionalModel();
 
-                    //是否为日期查询，用于string类型
+                    // 是否为日期查询，用于string类型
                     bool isDateQuery = false;
                     string timeSuffix = "";
 
                     #region 表字段获取
-                    //表别名
+                    // 表别名
                     if (prop.IsDefined(typeof(DbTableAliasAttribute), true))
                     {
                         var attr = prop.GetCustomAttributes(typeof(DbTableAliasAttribute), true)[0] as DbTableAliasAttribute;
                         condition.FieldName += attr!.GetTableAlias() + ".";
                     }
 
-                    //表字段名
+                    // 表字段名
                     if (prop.IsDefined(typeof(DbQueryFieldAttribute), true))
                     {
                         var attr = prop.GetCustomAttributes(typeof(DbQueryFieldAttribute), true)[0] as DbQueryFieldAttribute;
                         condition.FieldName += attr!.GetFieldName();
 
-                        //日期查询
+                        // 日期查询
                         if (attr.IsDateQuery())
                         {
                             isDateQuery = true;
@@ -113,7 +113,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                             }
                         }
                     }
-                    //未配置DbQueryField，直接取字段名称
+                    // 未配置DbQueryField，直接取字段名称
                     else
                     {
                         condition.FieldName += prop.Name;
@@ -131,22 +131,22 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     #endregion
 
                     #region 参数赋值
-                    //字段类型
+                    // 字段类型
                     Type propType = prop.PropertyType;
 
-                    //字符串
+                    // 字符串
                     if (propType == typeof(string))
                     {
                         condition.CSharpTypeName = nameof(String);
                         condition.FieldValue = ((string)value).ToSqlFilter();
 
-                        //日期查询
+                        // 日期查询
                         if (isDateQuery)
                         {
                             condition.FieldValue += $" {timeSuffix}".ToSqlFilter();
                         }
                     }
-                    //时间
+                    // 时间
                     else if (propType == typeof(DateTime) || propType == typeof(DateTime?))
                     {
                         if (isDateQuery)
@@ -160,31 +160,31 @@ namespace SqlSugar.Attributes.Extension.Extensions
                             condition.FieldValue = ((DateTime)value).ToFormattedString();
                         }
                     }
-                    //布尔值
+                    // 布尔值
                     else if (propType == typeof(bool) || propType == typeof(bool?))
                     {
                         condition.CSharpTypeName = nameof(Boolean);
                         condition.FieldValue = ((bool)value).ToString();
                     }
-                    //基础类型
+                    // 基础类型
                     else if (propType.IsPrimitive)
                     {
                         condition.CSharpTypeName = propType.Name;
                         condition.FieldValue = value + "";
                     }
-                    //数组
+                    // 数组
                     else if (value is Array array)
                     {
                         condition.CSharpTypeName = propType.GetElementType()?.Name; //获取泛型类型
                         condition.FieldValue = string.Join(",", GetArrayElements(array));
                     }
-                    //集合
+                    // 集合
                     else if (value is IEnumerable enumerable)
                     {
                         condition.CSharpTypeName = propType.GetGenericArguments()[0].Name; //获取泛型类型
                         condition.FieldValue = string.Join(",", GetListElements(enumerable));
                     }
-                    //其他类型
+                    // 其他类型
                     else
                     {
                         condition.CSharpTypeName = propType.Name;
@@ -217,24 +217,24 @@ namespace SqlSugar.Attributes.Extension.Extensions
                 foreach (var prop in props)
                 {
                     #region 参数校验
-                    //校验是否为忽略字段
+                    // 校验是否为忽略字段
                     if (prop.GetCustomAttributes(typeof(DbIgnoreFieldAttribute), true).Length > 0)
                         continue;
 
-                    //校验是否多次标记
+                    // 校验是否多次标记
                     if (prop.GetCustomAttributes(typeof(DbQueryAttribute), true).Length > 1)
                         throw new GlobalException("查询字段特性存在多个!");
                     #endregion
 
                     string sql = string.Empty;
 
-                    //表别名
+                    // 表别名
                     if (prop.IsDefined(typeof(DbTableAliasAttribute), true))
                     {
 
                         var attr = prop.GetCustomAttributes(typeof(DbTableAliasAttribute), true)[0] as DbTableAliasAttribute;
 
-                        //校验子查询
+                        // 校验子查询
                         if (prop.IsDefined(typeof(DbSubQueryAttribute), true))
                             throw new GlobalException("使用[DbSubQueryAttribute]子查询时，请去除[DbTableAliasAttribute]!");
 
@@ -242,7 +242,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                         sql += "`" + attr!.GetTableAlias() + "`" + ".";
                     }
 
-                    //表字段名
+                    // 表字段名
                     if (prop.IsDefined(typeof(DbQueryFieldAttribute), true))
                     {
                         var attr = prop.GetCustomAttributes(typeof(DbQueryFieldAttribute), true)[0] as DbQueryFieldAttribute;
@@ -254,7 +254,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                             throw new GlobalException("请使用[DbSubQueryAttribute]子查询!");
                         }
 
-                        //如果为布尔值结果(查询结果)，转换结果
+                        // 如果为布尔值结果(查询结果)，转换结果
                         if (attr.IsBoolResult())
                         {
                             if (prop.PropertyType != typeof(bool) && prop.PropertyType != typeof(bool?))
@@ -267,7 +267,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                             sql += "`" + fieldName + "`";
                         }
                     }
-                    //子查询
+                    // 子查询
                     else if (prop.IsDefined(typeof(DbSubQueryAttribute), true))
                     {
                         var attr = prop.GetCustomAttributes(typeof(DbSubQueryAttribute), true)[0] as DbSubQueryAttribute;
@@ -280,7 +280,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                         sql += "`" + prop.Name + "`";
                     }
 
-                    //别名 表字段或子查询
+                    // 别名 表字段或子查询
                     if (!string.IsNullOrEmpty(sql))
                     {
                         sql += " AS " + "`" + prop.Name + "`" + ", ";
@@ -290,7 +290,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                 }
             }
 
-            //校验是否存在SELECT内容
+            // 校验是否存在SELECT内容
             if (select.Length > 0)
             {
                 return select.Remove(select.Length - 2, 2).ToString();
@@ -328,11 +328,11 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     {
                         var groupByAttr = prop.GetCustomAttributes(typeof(DbGroupByAttribute), true)[0] as DbGroupByAttribute;
 
-                        //是否使用查询特性参数
-                        //不使用查询特性
+                        // 是否使用查询特性参数
+                        // 不使用查询特性
                         if (!groupByAttr!.IsUseQueryFieldAttribute())
                         {
-                            //表别名
+                            // 表别名
                             string tableAlias = groupByAttr.GetTableAlias();
 
                             if (!string.IsNullOrEmpty(tableAlias))
@@ -340,13 +340,13 @@ namespace SqlSugar.Attributes.Extension.Extensions
                                 sql += "`" + tableAlias + "`" + ".";
                             }
 
-                            //表字段名
+                            // 表字段名
                             sql += "`" + groupByAttr.GetFieldName() + "`";
                         }
-                        //使用查询特性
+                        // 使用查询特性
                         else
                         {
-                            //表别名
+                            // 表别名
                             if (prop.IsDefined(typeof(DbTableAliasAttribute), true))
                             {
 
@@ -355,7 +355,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                                 sql += "`" + attr!.GetTableAlias() + "`" + ".";
                             }
 
-                            //表字段名
+                            // 表字段名
                             if (prop.IsDefined(typeof(DbQueryFieldAttribute), true))
                             {
                                 var attr = prop.GetCustomAttributes(typeof(DbQueryFieldAttribute), true)[0] as DbQueryFieldAttribute;
@@ -369,7 +369,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                             }
                         }
 
-                        //拼接sql
+                        // 拼接sql
                         if (!string.IsNullOrEmpty(sql))
                         {
                             groupBy.Append(sql + ", ");
@@ -378,7 +378,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                 }
             }
 
-            //校验是否存在GROUP BY内容
+            // 校验是否存在GROUP BY内容
             if (groupBy.Length > 0)
             {
                 return groupBy.Remove(groupBy.Length - 2, 2).ToString();
@@ -455,7 +455,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
         /// <returns></returns>
         public static ISugarQueryable<T> GroupBy<T, TResult>(this ISugarQueryable<T> queryable, TResult result)
         {
-            //获取分组部分
+            // 获取分组部分
             string groupBySql = result.GetGroupBySql();
             if (!string.IsNullOrEmpty(groupBySql))
             {

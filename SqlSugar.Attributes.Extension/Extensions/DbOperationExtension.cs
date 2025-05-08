@@ -46,7 +46,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
             // 值不为空，值类型为不可空类型
             else
             {
-                //判断是否可以赋值
+                // 判断是否可以赋值
                 if (!entityProperty.PropertyType.IsAssignableFrom(value.GetType()))
                     throw new GlobalException($"表字段[{fieldName}]类型与传参类型不一致!");
             }
@@ -115,7 +115,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
             where TEntity : class, new()
 
         {
-            //获取DTO模型属性
+            // 获取DTO模型属性
             var props = dto.GetType().GetProperties();
 
             if (props.Length > 0)
@@ -125,7 +125,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                 foreach (var prop in props)
                 {
                     #region 参数校验
-                    //校验是否为忽略字段
+                    // 校验是否为忽略字段
                     if (prop.GetCustomAttributes(typeof(DbIgnoreFieldAttribute), true).Length > 0)
                     {
                         continue;
@@ -133,21 +133,21 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     #endregion
 
                     #region 表字段获取及参数赋值
-                    //获取参数值
+                    // 获取参数值
                     var value = prop.GetValue(dto);
 
-                    //判断参数值是否为字符串，如果是字符串且为空
+                    // 判断参数值是否为字符串，如果是字符串且为空
                     if (value is string stringValue && string.IsNullOrEmpty(stringValue))
                         value = null;
 
-                    //映射参数
+                    // 映射参数
                     if (prop.IsDefined(typeof(DbOperationFieldAttribute), true))
                     {
                         var attr = prop.GetCustomAttributes(typeof(DbOperationFieldAttribute), true)[0] as DbOperationFieldAttribute;
 
                         fields.Add(attr!.GetFieldName(), value);
                     }
-                    //未配置DbOperationField，直接取字段名称
+                    // 未配置DbOperationField，直接取字段名称
                     else
                     {
                         fields.Add(prop.Name, value);
@@ -179,7 +179,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
             where TDto : class, new()
             where TEntity : class, new()
         {
-            //获取DTO模型属性
+            // 获取DTO模型属性
             var props = dto.GetType().GetProperties();
 
             if (props.Length > 0)
@@ -199,10 +199,10 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     #endregion
 
                     #region 表字段获取及参数赋值
-                    //获取参数值
+                    // 获取参数值
                     var value = prop.GetValue(dto);
 
-                    //判断参数值是否为字符串，如果是字符串且为空
+                    // 判断参数值是否为字符串，如果是字符串且为空
                     if (value is string stringValue && string.IsNullOrEmpty(stringValue))
                         value = null;
 
@@ -210,14 +210,14 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     {
                         var attr = prop.GetCustomAttributes(typeof(DbOperationFieldAttribute), true)[0] as DbOperationFieldAttribute;
 
-                        //参数是否允许更新为空,不允许更新为空，就直接忽略该字段不进行更新
+                        // 参数是否允许更新为空,不允许更新为空，就直接忽略该字段不进行更新
                         if (!attr!.IsAllowEmpty())
                         {
                             if (value is null)
                                 continue;
                         }
 
-                        //是否为更新条件
+                        // 是否为更新条件
                         if (attr.IsCondition())
                         {
                             // 创建条件表达式树，并进行拼接
@@ -229,7 +229,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                             assignments.Add(BindParameter<TEntity>(attr.GetFieldName(), value));
                         }
                     }
-                    //未配置DbOperationField，直接取字段名称
+                    // 未配置DbOperationField，直接取字段名称
                     else
                     {
                         if (value is null)
@@ -270,7 +270,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
             where TEntity : class, new()
 
         {
-            //获取DTO模型属性
+            // 获取DTO模型属性
             var props = dto.GetType().GetProperties();
 
             if (props.Length > 0)
@@ -282,7 +282,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
                 foreach (var prop in props)
                 {
                     #region 参数校验
-                    //校验是否为忽略字段
+                    // 校验是否为忽略字段
                     if (prop.GetCustomAttributes(typeof(DbIgnoreFieldAttribute), true).Length > 0)
                     {
                         continue;
@@ -290,10 +290,10 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     #endregion
 
                     #region 表字段获取及参数赋值
-                    //获取参数值
+                    // 获取参数值
                     var value = prop.GetValue(dto);
 
-                    //判断参数值是否为字符串，如果是字符串且为空
+                    // 判断参数值是否为字符串，如果是字符串且为空
                     if (value is string stringValue && string.IsNullOrEmpty(stringValue))
                         value = null;
 
@@ -301,14 +301,14 @@ namespace SqlSugar.Attributes.Extension.Extensions
                     {
                         var attr = prop.GetCustomAttributes(typeof(DbOperationFieldAttribute), true)[0] as DbOperationFieldAttribute;
 
-                        //参数是否允许更新为空,不允许更新为空，就直接忽略该字段不进行更新
+                        // 参数是否允许更新为空,不允许更新为空，就直接忽略该字段不进行更新
                         if (!attr!.IsAllowEmpty())
                         {
                             if (value is null)
                                 continue;
                         }
 
-                        //是否为更新条件
+                        // 是否为更新条件
                         if (attr.IsCondition())
                         {
                             conditions.Add(attr.GetFieldName());
@@ -316,7 +316,7 @@ namespace SqlSugar.Attributes.Extension.Extensions
 
                         fields.Add(attr.GetFieldName(), value);
                     }
-                    //未配置DbOperationField，直接取字段名称
+                    // 未配置DbOperationField，直接取字段名称
                     else
                     {
                         fields.Add(prop.Name, value);
